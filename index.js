@@ -21,6 +21,8 @@ let data = {
   ]
 }
 
+app.use(express.json())
+
 app.get('/', (req, res) => {
 	res.send('<h1 style="color: blue;">Hello World!</h1>')
 })
@@ -30,7 +32,7 @@ app.get('/api/persons', (req, res) => {
 })
 
 app.get('/info', (req, res) => {
-	let content = 
+	const content = 
 		`<p>Phonebook has info for ${data.persons.length} people</p> 
 		<p>${new Date()}</p>`
 	res.send(content)
@@ -51,8 +53,31 @@ app.get('/api/persons/:id', (req, res) => {
 app.delete('/api/persons/:id', (req, res) => {
 	const id = Number(req.params.id)
 	data.persons = data.persons.filter(p => p.id !== id)
-	
+
 	res.status(204).end()
+})
+
+const generateId = () => {
+	return Math.floor(Math.random() * 10**8)
+}
+
+app.post('/api/persons', (req, res) => {
+	console.log("POST request body", req.body)
+	const body = req.body
+
+	if(!body.name) {
+		return res.status(400).json({
+			error: 'No name submitted'
+		})
+	}
+
+	const newPerson = {
+		name: body.name, 
+		number: body.name,
+		id: generateId()
+	}
+	data.persons = data.persons.concat(newPerson)
+	res.json(newPerson)
 })
 
 const PORT = 3001
