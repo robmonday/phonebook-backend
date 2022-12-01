@@ -62,14 +62,19 @@ const generateId = () => {
 }
 
 app.post('/api/persons', (req, res) => {
-	console.log("POST request body", req.body)
-	const body = req.body
+	// console.log("POST request body", req.body)
+	const body = req.body // get body from POST request
 
-	if(!body.name) {
-		return res.status(400).json({
-			error: 'No name submitted'
-		})
-	}
+	// validation
+	const nameFound = data.persons.find(p => p.name === body.name)
+	console.log("nameFound", nameFound)
+	if (nameFound) {
+		return res.status(400).json({error: 'Name already has a record'})
+	} else if(!body.name) {
+		return res.status(400).json({error: 'No name submitted'})
+	} else if (!body.number) {
+		return res.status(400).json({error: 'No number submitted'})
+	} // returned value is not used anywhere, but returning, prevents rest of code from running
 
 	const newPerson = {
 		name: body.name, 
