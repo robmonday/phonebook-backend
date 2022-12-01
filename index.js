@@ -29,6 +29,13 @@ app.get('/api/persons', (req, res) => {
 	res.json(data)
 })
 
+app.get('/info', (req, res) => {
+	let content = 
+		`<p>Phonebook has info for ${data.persons.length} people</p> 
+		<p>${new Date()}</p>`
+	res.send(content)
+})
+
 app.get('/api/persons/:id', (req, res) => {
 	const id = Number(req.params.id)
 	const person = data.persons.find(p => id===p.id)
@@ -39,13 +46,6 @@ app.get('/api/persons/:id', (req, res) => {
 		res.statusMessage = `No person with id = ${id}`
 		res.status(404).end()
 	}
-})
-
-app.get('/info', (req, res) => {
-	let content = 
-		`<p>Phonebook has info for ${data.persons.length} people</p> 
-		<p>${new Date()}</p>`
-	res.send(content)
 })
 
 const PORT = 3001
