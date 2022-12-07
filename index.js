@@ -85,7 +85,7 @@ app.post('/api/persons', (req, res) => {
 
 	const newPerson = {
 		name: body.name, 
-		number: body.name,
+		number: body.number,
 		id: generateId()
 	}
 	data.persons = data.persons.concat(newPerson)
