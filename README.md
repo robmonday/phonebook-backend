@@ -6,4 +6,4 @@ Created by Rob M
 
 More documentation should be here.
 
-<http://fullstackopen.com/en/>
+[Link to course website](http://fullstackopen.com/en/)
