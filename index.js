@@ -1,12 +1,15 @@
 const express = require('express')
 const app = express()
 
+app.use(express.static('build'))
+
 const cors = require('cors')
 app.use(cors())
 
-const morgan = require('morgan')
-morgan.token('postObj',(req) => {return JSON.stringify(req.body)})
-app.use(morgan(':method :url :status :res[content-length] - :response-time ms :postObj'))
+// Removed as instructed, so app can work with fly.io
+// const morgan = require('morgan')
+// morgan.token('postObj',(req) => {return JSON.stringify(req.body)})
+// app.use(morgan(':method :url :status :res[content-length] - :response-time ms :postObj'))
 
 let data = {
   "persons": [
@@ -92,7 +95,7 @@ app.post('/api/persons', (req, res) => {
 	res.json(newPerson)
 })
 
-const PORT = process.env.PORT || 3001
+const PORT = process.env.PORT || 8080
 app.listen(PORT, () => {
 	console.log(`Server running on port ${PORT}`)
 })
