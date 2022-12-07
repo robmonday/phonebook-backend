@@ -6,4 +6,4 @@ Created by Rob M
 
 More documentation should be here.
 
-<fullstackopen.com/en/>
+<http://fullstackopen.com/en/>
