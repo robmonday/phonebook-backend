@@ -1,9 +1,11 @@
+require('dotenv').config()
 const express = require('express')
 const app = express()
+const Person = require('./models/person')
 
-app.use(express.static('build'))
 
 const cors = require('cors')
+const { connection } = require('mongoose')
 app.use(cors())
 
 // Removed as instructed, so app can work with fly.io
@@ -12,40 +14,50 @@ app.use(cors())
 // app.use(morgan(':method :url :status :res[content-length] - :response-time ms :postObj'))
 
 let data = {
-  "persons": [
-    {
-      "name": "Susan Cowan",
-      "number": "865-384-1490",
-      "id": 1
-    },
-    {
-      "name": "Rob Monday",
-      "number": "678-561-7626",
-      "id": 2
-    },
-    {
-      "name": "Richard Cowan",
-      "number": "865-740-0011",
-      "id": 3
-    }
-  ]
+	"persons": [
+		{
+			"name": "Susan Cowan",
+			"number": "865-384-1490",
+			"id": 1
+		},
+		{
+			"name": "Rob Monday",
+			"number": "678-561-7626",
+			"id": 2
+		},
+		{
+			"name": "Richard Cowan",
+			"number": "865-740-0011",
+			"id": 3
+		}
+	]
 }
 
-app.use(express.json())
+app.use(express.static('build'))
 
+// This path has been overridden by the above static method
 app.get('/', (req, res) => {
 	res.send('<h1 style="color: blue;">Hello World!</h1>')
 })
 
+app.use(express.json())
+
 app.get('/api/persons', (req, res) => {
-	res.json(data)
-})
+	Person.find({})
+	// data returned needed to be placed as value of "persons" key inside an object
+	// because this is how I originally built my frontend
+	.then( persons => {
+		const data = {}
+		data.persons = persons
+		// console.log(data)
+		res.json(data)
+	})
+}) 
 
 app.get('/info', (req, res) => {
-	const content = 
-		`<p>Phonebook has info for ${data.persons.length} people</p> 
-		<p>${new Date()}</p>`
-	res.send(content)
+	Person.find({}).then( persons => 
+		res.send(`<p>Phonebook has info for ${persons.length} people</p> 
+		<p>${new Date()}</p>`))
 })
 
 app.get('/api/persons/:id', (req, res) => {
@@ -95,7 +107,7 @@ app.post('/api/persons', (req, res) => {
 	res.json(newPerson)
 })
 
-const PORT = process.env.PORT || 8080
+const PORT = process.env.PORT
 app.listen(PORT, () => {
 	console.log(`Server running on port ${PORT}`)
 })
