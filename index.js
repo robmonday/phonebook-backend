@@ -88,24 +88,52 @@ app.post('/api/persons', (req, res) => {
 	const body = req.body // get body from POST request
 
 	// validation
-	const nameFound = data.persons.find(p => p.name === body.name)
-	console.log("nameFound", nameFound)
-	if (nameFound) {
-		return res.status(400).json({error: 'Name already has a record'})
-	} else if(!body.name) {
+	// const nameFound = data.persons.find(p => p.name === body.name)
+	// console.log("nameFound", nameFound)
+	// if (nameFound) {
+	// 	return res.status(400).json({error: 'Name already has a record'})
+	// } else 
+	if(!body.name) {
 		return res.status(400).json({error: 'No name submitted'})
 	} else if (!body.number) {
 		return res.status(400).json({error: 'No number submitted'})
 	} // returned value is not used anywhere, but returning, prevents rest of code from running
-
-	const newPerson = {
+	
+	const newPerson = new Person({
 		name: body.name, 
 		number: body.number,
-		id: generateId()
-	}
-	data.persons = data.persons.concat(newPerson)
-	res.json(newPerson)
+		// id: generateId()
+	})
+	
+	newPerson.save().then(savedPerson => {
+		res.json(savedPerson)
+	})
 })
+
+// Old Version
+// app.post('/api/persons', (req, res) => {
+// 	// console.log("POST request body", req.body)
+// 	const body = req.body // get body from POST request
+
+// 	// validation
+// 	const nameFound = data.persons.find(p => p.name === body.name)
+// 	console.log("nameFound", nameFound)
+// 	if (nameFound) {
+// 		return res.status(400).json({error: 'Name already has a record'})
+// 	} else if(!body.name) {
+// 		return res.status(400).json({error: 'No name submitted'})
+// 	} else if (!body.number) {
+// 		return res.status(400).json({error: 'No number submitted'})
+// 	} // returned value is not used anywhere, but returning, prevents rest of code from running
+
+// 	const newPerson = {
+// 		name: body.name, 
+// 		number: body.number,
+// 		id: generateId()
+// 	}
+// 	data.persons = data.persons.concat(newPerson)
+// 	res.json(newPerson)
+// })
 
 const PORT = process.env.PORT
 app.listen(PORT, () => {
