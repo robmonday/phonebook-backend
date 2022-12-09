@@ -6,6 +6,7 @@ const Person = require('./models/person')
 
 const cors = require('cors')
 const { connection } = require('mongoose')
+const { response } = require('express')
 app.use(cors())
 
 // Removed as instructed, so app can work with fly.io
@@ -13,35 +14,34 @@ app.use(cors())
 // morgan.token('postObj',(req) => {return JSON.stringify(req.body)})
 // app.use(morgan(':method :url :status :res[content-length] - :response-time ms :postObj'))
 
-// Hoping to comment out this object soon!
-let data = {
-	"persons": [
-		{
-			"name": "Local Person 1",
-			"number": "123",
-			"id": 1
-		},
-		{
-			"name": "Local Person 2",
-			"number": "456",
-			"id": 2
-		},
-		{
-			"name": "Local Person 3",
-			"number": "789",
-			"id": 3
-		}
-	]
-}
+// Original list of objects no longer in use
+// let data = {
+// 	"persons": [
+// 		{
+// 			"name": "Local Person 1",
+// 			"number": "123",
+// 			"id": 1
+// 		},
+// 		{
+// 			"name": "Local Person 2",
+// 			"number": "456",
+// 			"id": 2
+// 		},
+// 		{
+// 			"name": "Local Person 3",
+// 			"number": "789",
+// 			"id": 3
+// 		}
+// 	]
+// }
 
 app.use(express.static('build'))
+app.use(express.json())
 
 // This path has been overridden by the above static method
 app.get('/', (req, res) => {
 	res.send('<h1 style="color: blue;">Hello World!</h1>')
 })
-
-app.use(express.json())
 
 app.get('/api/persons', (req, res) => {
 	Person.find({})
@@ -61,16 +61,17 @@ app.get('/info', (req, res) => {
 		<p>${new Date()}</p>`))
 })
 
-app.get('/api/persons/:id', (req, res) => {
+app.get('/api/persons/:id', (req, res, next) => {
 	const id = Number(req.params.id)
-	const person = data.persons.find(p => id===p.id)
-	if (person) {
-		res.json(person)
-	} else {
-		console.log("Person record not found")
-		res.statusMessage = `No person with id = ${id}`
-		res.status(404).end()
-	}
+	Person.findById(req.params.id)
+		.then(person => {
+			if (person) {
+				res.json(person)
+			} else {
+				res.status(404).end()
+			}
+		})
+		.catch(err => next(err))
 })
 
 app.delete('/api/persons/:id', (req, res) => {
@@ -80,9 +81,9 @@ app.delete('/api/persons/:id', (req, res) => {
 		.catch(error => next(error))
 })
 
-const generateId = () => {
-	return Math.floor(Math.random() * 10**8)
-}
+// const generateId = () => {
+// 	return Math.floor(Math.random() * 10**8)
+// }
 
 app.post('/api/persons', (req, res) => {
 	// console.log("POST request body", req.body)
@@ -110,6 +111,19 @@ app.post('/api/persons', (req, res) => {
 		res.json(savedPerson)
 	})
 })
+
+const errorHandler = (error, request, response, next) => {
+	console.error(error.message)
+
+	if (error.name === 'CastError') {
+		return response.status(400).send({ error: 'malformatted id' })
+	}
+
+	next(error)
+}
+
+// this has to be the last loaded middleware.
+app.use(errorHandler)
 
 const PORT = process.env.PORT
 app.listen(PORT, () => {
